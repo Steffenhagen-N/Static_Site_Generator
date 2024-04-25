@@ -1,3 +1,6 @@
+from constants import TextType
+from textnode import TextNode
+
 class HTMLNode:
     def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
@@ -20,7 +23,7 @@ class HTMLNode:
         return f"HTMLNode({self.tag}, {self.value}, children: {self.children}, {self.props})"
     
 class LeafNode(HTMLNode):
-    def __init__(self, tag=None, value=None, props=None):
+    def __init__(self, tag:str=None, value:str=None, props:dict=None):
         if not value:
             raise ValueError('''LeafNode requires a "value"''')
         super().__init__(tag=tag, value=value, children=None, props=props)
@@ -33,7 +36,7 @@ class LeafNode(HTMLNode):
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
 class ParentNode(HTMLNode):
-    def __init__(self, tag=None, children=None, props=None):
+    def __init__(self, tag:str=None, children:list=None, props:dict=None):
         if not children:
             raise ValueError('''ParentNode requires a "children"''')
         super().__init__(tag=tag, value=None, children=children, props=props)
@@ -59,25 +62,23 @@ class ParentNode(HTMLNode):
 
 
 # ------------------ THIS NEEDS TO BE TESTED --------------------------
-def text_node_to_html_node(text_node):
-    valid_types = ["text", "bold", "italic", "code", "link", "image"]
-
-    if text_node.text_type not in valid_types:
+def text_node_to_html_node(text_node:TextNode) -> LeafNode:
+    if text_node.text_type not in TextType:
         raise ValueError("TextNode has invalid text_type")
     
-    if text_node.text_type == "text":
+    if text_node.text_type == TextType.TEXT:
         return LeafNode(tag=None, value=text_node.text, props=None)
-    elif text_node.text_type == "bold":
+    elif text_node.text_type == TextType.BOLD:
         return LeafNode(tag="b", value=text_node.text, props=None)
-    elif text_node.text_type == "italic":
+    elif text_node.text_type == TextType.ITALIC:
         return LeafNode(tag="i", value=text_node.text, props=None)
-    elif text_node.text_type == "code":
+    elif text_node.text_type == TextType.CODE:
         return LeafNode(tag="code", value=text_node.text, props=None)
-    elif text_node.text_type == "link":
+    elif text_node.text_type == TextType.LINK:
         if not text_node.url:
             raise ValueError("Missing URL for link-type LeafNode")
         return LeafNode(tag="a", value=text_node.text, props={"href": text_node.url})
-    elif text_node.text_type == "image":
+    elif text_node.text_type == TextType.IMAGE:
         if not text_node.url:
             raise ValueError("Missing URL for image-type LeafNode")
         if not text_node.text:
