@@ -31,3 +31,21 @@ class LeafNode(HTMLNode):
         if not self.tag:
             return self.value
         return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+
+class ParentNode(HTMLNode):
+    def __init__(self, tag=None, children=None, props=None):
+        if not children:
+            raise ValueError('''ParentNode requires a "children"''')
+        super().__init__(tag=tag, value=None, children=children, props=props)
+
+    def to_html(self):
+        if not self.tag:
+            raise ValueError('''ParentNode.to_html() requires a "tag"''')
+        if not self.children:
+            raise ValueError('''ParentNode.to_html() requires a "children"''')
+        
+        children_string = ""
+        # make subfunction to recur over self.children
+        # and add it to children string
+
+        return f"<{self.tag}{self.props_to_html()}>{children_string}</{self.tag}>"

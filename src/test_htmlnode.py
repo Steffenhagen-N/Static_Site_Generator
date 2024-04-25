@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 class TestHTMLNode(unittest.TestCase):
 
@@ -46,6 +46,10 @@ class TestHTMLNode(unittest.TestCase):
         print("Testing repr LeafNode")
         print(leaf)
         print("")
+
+class TestParentNode(unittest.TestCase):
+    pass
+
 
 if __name__ == "__main__":
     unittest.main()
