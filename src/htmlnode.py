@@ -45,7 +45,14 @@ class ParentNode(HTMLNode):
             raise ValueError('''ParentNode.to_html() requires a "children"''')
         
         children_string = ""
-        # make subfunction to recur over self.children
-        # and add it to children string
+        
+        def translate_children(child_list):
+            nonlocal children_string
+            if len(child_list) == 0:
+                return ""
+            children_string += child_list[0].to_html()
+            translate_children(child_list[1:])
+
+        translate_children(self.children)
 
         return f"<{self.tag}{self.props_to_html()}>{children_string}</{self.tag}>"
