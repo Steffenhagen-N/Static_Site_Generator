@@ -2,6 +2,8 @@ from constants import TextType
 
 class TextNode:
     def __init__(self, text:str, text_type:TextType, url:str):
+        if text_type not in TextType:
+            raise ValueError("Invalid TextType")
         self.text = text
         self.text_type = text_type
         self.url = url

@@ -21,7 +21,8 @@ class HTMLNode:
     
     def __repr__(self):
         return f"HTMLNode({self.tag}, {self.value}, children: {self.children}, {self.props})"
-    
+
+# add functionality for self-closing elements idiot   
 class LeafNode(HTMLNode):
     def __init__(self, tag:str=None, value:str=None, props:dict=None):
         if not value:
@@ -64,7 +65,7 @@ class ParentNode(HTMLNode):
 # ------------------ THIS NEEDS TO BE TESTED --------------------------
 def text_node_to_html_node(text_node:TextNode) -> LeafNode:
     if text_node.text_type not in TextType:
-        raise ValueError("TextNode has invalid text_type")
+        raise ValueError(f"{text_node.text_type} is an illegal text_type")
     
     if text_node.text_type == TextType.TEXT:
         return LeafNode(tag=None, value=text_node.text, props=None)
@@ -77,11 +78,16 @@ def text_node_to_html_node(text_node:TextNode) -> LeafNode:
     elif text_node.text_type == TextType.LINK:
         if not text_node.url:
             raise ValueError("Missing URL for link-type LeafNode")
-        return LeafNode(tag="a", value=text_node.text, props={"href": text_node.url})
+        return LeafNode(tag="a", value=text_node.text, 
+                        props={"href": text_node.url})
+    
+    # this bastard text type made me rework how 
+    # the entire LeafNode class functions
     elif text_node.text_type == TextType.IMAGE:
         if not text_node.url:
             raise ValueError("Missing URL for image-type LeafNode")
         if not text_node.text:
             raise ValueError("Missing Alt. Text for image-type LeafNode")
-        return LeafNode(tag="img", value="", props={"src": text_node.url, "alt": text_node.text})
+        return LeafNode(tag="img", value="This is an image LeafNode", 
+                        props={"src": text_node.url, "alt": text_node.text})
 # ------------------- THIS NEEDS TO BE TESTED ------------------------
