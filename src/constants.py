@@ -12,8 +12,8 @@ class TextType(StrEnum):
     IMAGE = "image"
 
 # List of HTML tags that are self-closing
-# This list can be preemptively updated
-# As it is only checked after TextType
+# Primarily used in text_node_to_html_node and LeafNode under htmlnode
+# This list can be preemptively updated as it is only checked after TextType
 @unique
 class SelfClosedTag(StrEnum):
     IMAGE = "img"
@@ -21,3 +21,11 @@ class SelfClosedTag(StrEnum):
     #BASE = "base"
     #EMBED = "embed"
     #INPUT = "input"
+
+# List of Markdown delimiters that have closing tags
+# Used in isolating formatting delimiterxs in TextNodes
+@unique
+class ClosedDelimiter(StrEnum):
+    ITALIC = "*"
+    BOLD = "**"
+    CODE = "`"
