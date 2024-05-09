@@ -21,11 +21,3 @@ class SelfClosedTag(StrEnum):
     #BASE = "base"
     #EMBED = "embed"
     #INPUT = "input"
-
-# List of Markdown delimiters that have closing tags
-# Used in isolating formatting delimiterxs in TextNodes
-@unique
-class ClosedDelimiter(StrEnum):
-    ITALIC = "*"
-    BOLD = "**"
-    CODE = "`"

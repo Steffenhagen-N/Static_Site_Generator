@@ -1,4 +1,5 @@
-from constants import TextType, ClosedDelimiter
+from constants import TextType
+import re
 
 class TextNode:
     def __init__(self, text:str, text_type:TextType, url:str):
@@ -25,25 +26,182 @@ class TextNode:
 def split_text_TextNode(old_nodes:list) -> list:
     new_list = []
 
-    # Recursive helper function that appends each item to the new list
-    # After modifying text-type TextNodes
-    def split_nodes(text_nodes:list):
+    # Recursive helper function that appends non-text TextType TextNodes
+    # Calls another helper function on text TextNodes to split them
+    def verify_nodes(text_nodes:list):
         nonlocal new_list
         if len(text_nodes) == 0:
             return new_list
         
         if text_nodes[0].text_type != TextType.TEXT:
             new_list.append(text_nodes[0])
-            split_nodes(text_nodes[1:])
+            verify_nodes(text_nodes[1:])
         else:
-            pass
-        # consider using the re module to do this section
-            # Code to find index of all delimiters
-                # If no ending delimiter raise error
-                # If overlapping delimiters raise error
-            # Split string into different strings by delimiter
-            # Assign each string as a TextNode with appropriate type
-            # Append all nodes to list
-            # Recall function on text_nodes +1
+            new_list.extend(split_node(text_nodes[0]))
+            verify_nodes(text_nodes[1:])
+
+    # Helper function that splits text TextNodes into a list
+    # Of other TextNodes by style delimiters
+    def split_node(text_node:TextNode) -> list:
+        if text_node.text_type != TextType.TEXT:
+            raise ValueError(f"Cannot split {text_node.text_type} type TextNode")
+        node_text = text_node.text
+        split_string = []
+        nodes = []
+
+        # Checks if there is an even number of identical delimiters
+        if len(re.findall(r"(?<!\*)\*(?!\*)", node_text))%2 != 0:
+            raise SyntaxError("*Italic* style requires a closing delimiter")
+        if len(re.findall(r"\*\*(?!\*)", node_text))%2 != 0:
+            raise SyntaxError("**Bold** style requires a closing delimiter")
+        if len(re.findall(r"\`(?!\`)", node_text))%2 != 0:
+            raise SyntaxError("`Code` style requires a closing delimiter")
+
+        # Helper function that ensures no nested delimiters
+        # I am restricting nested delimiters because creating a parser
+        # Is beyond the scope of this project
+        # Raises an error if nested delimiters are detected
+        # Returns nothing if text is valid
+        check_overlap(node_text)
+
+
+        # Oh God Oh Fuck Regular Expressions
+        # Theoretically this should split the string by all delimiters
+        # I chose to use regex because it significantly reduced the 
+        # number of lines needed to accomplish the same thing
+        # This is further simplified by disallowing nested delimiters
+
+        # First the single node text is split on all italic delimiters
+        # and stored as a list in split_string
+        split_string = re.split(r"((?<!\*)\*[^\*]+\*(?!\*))", node_text)
+        # Next each split string is checked for bold delimiters, and is 
+        # split again and stored in order back in split_string
+        temp_list = []
+        for string in split_string:
+            temp_list.extend(re.split(r"(\*\*[^\*]+\*\*)", string))
+        split_string = temp_list
+        # Finally all of the strings are checked for code delimiters
+        temp_list = []
+        for string in split_string:
+            temp_list.extend(re.split(r"(\`[^\`]+\`)", string))
+        split_string = temp_list
+        # After all of the regex hell, split_string is a list of strings
+        # with the original order preserved, and original delimiters 
+        # opening and closing their respective substring
+        
+        # The filter method is necessary to remove any empty strings
+        # generated from strings that begin with delimiters
+        split_string = list(filter(None, split_string))
+
+        # Transforms the list of strings into a list of TextNodes
+        nodes = to_TextNode(split_string)
+
+        return nodes
     
-    return split_nodes(old_nodes)
+    # Checks if style delimiters are nested
+    # Raises an error if True
+    # Else returns "All good" 
+    def check_overlap(text:str):
+
+        italic_range = []
+        bold_range = []
+        code_range = []
+
+        # Checks specifically for ***bold and italic*** text delimiters
+        # because they reuse the same character
+        if "***" in text:
+            raise SyntaxError("I swear to GOD if you're trying to use bold "
+                                "and italic at the same time I will "
+                                "personally find you and beat you to death "
+                                "because I can't be fucked to figure out "
+                                "parsers right now because I'm already "
+                                "sick of regex and I miss when commands "
+                                "had names that made sense like what the "
+                                "FUCK does \[(.*?)\]\((.*?)\) even MEAN")
+        
+
+        # First we're compiling tuples representing the index range
+        # of all italic text
+        # This looks scary, but it's not too bad
+        # (?<!\*) is a negative lookback that checks for *
+        # \* checks for a single asterisk
+        # [^\*]+ looks for one or more characters that are not *
+        # (\*\*[^\*]*)? means to ignore potential ** followed by 0 or more ^*
+        # \* is the ending * for the end of the italic syntax
+        for m in re.finditer(r"((?<!\*)\*[^\*]+(\*\*[^\*]*)?\*)", text):
+            italic_range.append((m.start(), m.end()))
+        
+        # Then for bold...
+        # (?:\*[^\*]+)* means there will be 0 or more single asterisks, 
+        # and to look for characters that are not *
+        # This means the regex will keep looking for * if it finds one without
+        # another one directly behind it
+        for m in re.finditer(r"(\*\*(?:\*?[^\*]+)*\*\*)", text):
+            bold_range.append((m.start(), m.end()))
+
+        # And finally code
+        for m in re.finditer(r"(\`[^\`]+\`)", text):
+            code_range.append((m.start(), m.end()))
+        
+
+        # Then we check each italic range against the other ranges
+        for itc in italic_range:
+            for bld in bold_range:
+                if itc[0] in range(bld[0], bld[1]):
+                    raise SyntaxError("Nested delimiters not allowed")
+            for cde in code_range:
+                if itc[0] in range(cde[0], cde[1]):
+                    raise SyntaxError("Nested delimiters not allowed")
+                
+        # Followed by bold...
+        for bld in bold_range:
+            for itc in italic_range:
+                if bld[0] in range(itc[0], itc[1]):
+                    raise SyntaxError("Nested delimiters not allowed")
+            for cde in code_range:
+                if bld[0] in range(cde[0], cde[1]):
+                    raise SyntaxError("Nested delimiters not allowed")
+                
+        # And ending with code
+        for cde in code_range:
+            for itc in italic_range:
+                if cde[0] in range(itc[0], itc[1]):
+                    raise SyntaxError("Nested delimiters not allowed")
+            for bld in bold_range:
+                if cde[0] in range(bld[0], bld[1]):
+                    raise SyntaxError("Nested delimiters not allowed")
+
+
+        # We don't do anything with this, it's just here for debugging
+        return "All good!"
+
+    # Transforms a list of strings into a list of different TextNodes
+    # based on opening and closing delimiters
+    def to_TextNode(lines:list) -> list:
+        temp_list = []
+
+        # Since we've already ensured that each delimiter is only ever at
+        # the start or end of a string, we can avoid regex and use 
+        # the native .startswith and .endswith instead
+        for line in lines:
+            if line.startswith("`") and line.endswith("`"):
+                node_text = line.strip("`")
+                temp_list.append(TextNode(text=node_text, 
+                                          text_type=TextType.CODE, url=None))
+            elif line.startswith("**") and line.endswith("**"):
+                node_text = line.strip("*")
+                temp_list.append(TextNode(text=node_text,
+                                          text_type=TextType.BOLD, url=None))
+            elif line.startswith("*") and line.endswith("*"):
+                node_text = line.strip("*")
+                temp_list.append(TextNode(text=node_text,
+                                          text_type=TextType.ITALIC, url=None))
+            else:
+                temp_list.append(TextNode(text=line, 
+                                          text_type=TextType.TEXT, url=None))
+
+        return temp_list
+
+    verify_nodes(old_nodes)
+    return new_list
+
