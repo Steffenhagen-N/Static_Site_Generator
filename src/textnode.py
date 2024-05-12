@@ -117,7 +117,7 @@ def split_text_TextNode(old_nodes:list) -> list:
                                 "parsers right now because I'm already "
                                 "sick of regex and I miss when commands "
                                 "had names that made sense like what the "
-                                "FUCK does \[(.*?)\]\((.*?)\) even MEAN")
+                                "FUCK does [(.*?)\]\((.*?)\) even MEAN")
         
 
         # First we're compiling tuples representing the index range
@@ -205,3 +205,69 @@ def split_text_TextNode(old_nodes:list) -> list:
     verify_nodes(old_nodes)
     return new_list
 
+# Small function to return a list of tuples of image alt text and URL
+# sliced from within a given string 
+#
+#
+# Unsolved issue with function: 
+#   As of right now, this function falls apart when encountering cases
+#   where the user includes an unclosed "![" before the image declaration
+#   within the same string. There is currently no way for the regex to
+#   discern the context in which the string is written. 
+#
+#   Additionally, if you nest another image format string inside the alt
+#   text of the outer image, the url of the outer image will not be captured
+#   and only one image tuple will be generated
+#
+#
+# Potential solutions considered:
+#   I have considered a few different potential solutions to the issue, 
+#   all of which come with their own set of issues.
+# 
+#   1. Using regex to disallow two "[" in a row without a "]"" between them
+#       Raising a syntax error in this case would allert the user to 
+#       the issue their string would cause, but locks the user out of
+#       legitimate cases where brackets are used inside the image alt text
+#       or an unclosed bracket in the preceding text
+#
+#   2. Using regex alongside pythonic functions to determine the 
+#   index range of all "[" "]" pairs, and use the "[" "]" only immediately 
+#   before the image URL
+#       This in combination with the first solution would help, but it's
+#       just a workaround that doesn't actually address the underlying issue
+#
+#   3. Check for an equal number of "[" and "]" and raises an error if not
+#       This is another case where technically it solves the core issue, 
+#       but at the expense of further functionality. In this case I 
+#       believe it would restrict much more functionality than the issues
+#       it prevents
+# 
+#   4. Ignore all "![" preceeding a "]" except the last one
+#       This solves the issue, but creates a whole new issue when the user
+#       wants to include an unpaired "![" inside the image alt text.
+#
+#
+# Decision rationale:
+#   I have decided to move on from this issue because it seems the only way
+#   to address this issue is with a complex parser to determine context
+#   within the string. This is far too much effort and code for a one-line
+#   function that has an edge-case issue that most users will not encounter
+#
+#
+# Future consideration:
+#   I will revisit this decision if this project ever becomes public, or if
+#   in my own use this edge case becomes more significant than I anticipated.
+#   If you forsee this edge case becoming an issue, manually make a new image
+#   HTML TextNode with no preceding text. 
+def extract_markdown_images(text:str) -> list:
+    return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+
+# This function is similar to the one above, except instead of images
+# it extracts link tuples from a string.
+# It also has the same issues as the previous function, and for similar
+# reasons they are being ignored
+#
+# A negative lookbehind has been added to the beginnig to ensure
+# the function does not falsely capture images
+def extract_markdown_links(text:str) -> list:
+    return re.findall(r"(?<!\!)\[(.*?)\]\((.*?)\)", text)
