@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import extract_markdown_images, extract_markdown_links
+from textnode import TextNode, TextType, extract_markdown_images, extract_markdown_links, split_text_TextNode_by_image_or_link
 
 class TestExtractMDImage(unittest.TestCase):
 
@@ -245,6 +245,74 @@ class TestExtractMDLink(unittest.TestCase):
         print("Link(s):")
         print(my_link)
         print("")
+
+class TestSplitImageLinkTextnode(unittest.TestCase):
+
+    def test_notext(self):
+        my_image = TextNode("a bunny", TextType.IMAGE, "bunny.png")
+        my_bold = TextNode("I like bunnies", TextType.BOLD, None)
+        my_italic = TextNode("Especially baby ones", TextType.ITALIC, None)
+        my_nodes = [my_bold, my_image, my_italic]
+
+        print("")
+        print("Testing splitting " "\033[36m" "no text" "\033[0m" "...")
+        print("Original list:")
+        print(my_nodes)
+        print("")
+        print("Splitting...")
+        print(split_text_TextNode_by_image_or_link(my_nodes))
+
+    def test_empty_text(self):
+        my_text = TextNode("", TextType.TEXT, None)
+        my_text2 = TextNode(None, TextType.TEXT, None)
+        my_nodes = [my_text, my_text2]
+
+        print("")
+        print("Testing splitting " "\033[36m" "empty text" "\033[0m" "...")
+        print("Original list:")
+        print(my_nodes)
+        print("")
+        print("Splitting...")
+        print(split_text_TextNode_by_image_or_link(my_nodes))
+
+    def test_images(self):
+        my_text = TextNode("Image 1: ![I wish I was dead](urmom.png) Image 2: ![I sure hope this works](nohope.png)", TextType.TEXT, None)
+        my_text2 = TextNode("![This is a single image](urmom.com/selfie.png)", TextType.TEXT, None)
+        my_nodes = [my_text, my_text2]
+
+        print("")
+        print("Testing splitting " "\033[36m" "images" "\033[0m" "...")
+        print("Original list:")
+        print(my_nodes)
+        print("")
+        print("Splitting...")
+        print(split_text_TextNode_by_image_or_link(my_nodes))
+        
+    def test_links(self):
+        my_text = TextNode("Here's a link to [my website](www.boot.dev) that I made all by myself", TextType.TEXT, None)
+        my_text2 = TextNode("[This is a single link](my_link.butts)", TextType.TEXT, None)
+        my_nodes = [my_text, my_text2]
+
+        print("")
+        print("Testing splitting " "\033[36m" "links" "\033[0m" "...")
+        print("Original list:")
+        print(my_nodes)
+        print("")
+        print("Splitting...")
+        print(split_text_TextNode_by_image_or_link(my_nodes))
+
+    def test_both_in_string(self):
+        my_text = TextNode("first we have an ![image](image.url.png), and then a [link](my.link.com) surrounded by text!", TextType.TEXT, None)
+        my_text2 = TextNode("first we have a [link](my.link.com), and then an ![image](image.url.png) surrounded by text!", TextType.TEXT, None)
+        my_nodes = [my_text, my_text2]
+
+        print("")
+        print("Testing splitting " "\033[36m" "links and images at the same time" "\033[0m" "...")
+        print("Original list:")
+        print(my_nodes)
+        print("")
+        print("Splitting...")
+        print(split_text_TextNode_by_image_or_link(my_nodes))
 
 if __name__ == "__main__":
     unittest.main()

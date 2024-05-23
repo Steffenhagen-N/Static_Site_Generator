@@ -1,6 +1,7 @@
 from constants import TextType
 import re
 
+# (text:string, text_type:TextType, url:str)
 class TextNode:
     def __init__(self, text:str, text_type:TextType, url:str):
         if text_type not in TextType:
@@ -20,10 +21,10 @@ class TextNode:
 
 # Function to split a list of TextNodes
 # Returns a new list of TextNodes
-# Text-Type TextNodes are split by symmetrical closed delimiters
-# New TextNodes are created for each split with the appropriate type
-# All other nodes are returned unchanged
-def split_text_TextNode(old_nodes:list) -> list:
+def split_text_TextNode_by_delimiter(old_nodes:list) -> list:
+#   Text-Type TextNodes are split by symmetrical closed delimiters
+#   New TextNodes are created for each split with the appropriate type
+#   All other nodes are returned unchanged
     new_list = []
 
     # Recursive helper function that appends non-text TextType TextNodes
@@ -207,8 +208,7 @@ def split_text_TextNode(old_nodes:list) -> list:
 
 # Small function to return a list of tuples of image alt text and URL
 # sliced from within a given string 
-#
-#
+def extract_markdown_images(text:str) -> list:
 # Unsolved issue with function: 
 #   As of right now, this function falls apart when encountering cases
 #   where the user includes an unclosed "![" before the image declaration
@@ -259,15 +259,93 @@ def split_text_TextNode(old_nodes:list) -> list:
 #   in my own use this edge case becomes more significant than I anticipated.
 #   If you forsee this edge case becoming an issue, manually make a new image
 #   HTML TextNode with no preceding text. 
-def extract_markdown_images(text:str) -> list:
-    return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+    return re.findall(r"\!\[(.*?)\]\((.*?)\)", text)
 
 # This function is similar to the one above, except instead of images
 # it extracts link tuples from a string.
-# It also has the same issues as the previous function, and for similar
-# reasons they are being ignored
-#
-# A negative lookbehind has been added to the beginnig to ensure
-# the function does not falsely capture images
 def extract_markdown_links(text:str) -> list:
+    # It also has the same issues as the previous function, and for similar
+    # reasons they are being ignored
+    #  
+    # A negative lookbehind has been added to the beginnig to ensure
+    # the function does not falsely capture images
     return re.findall(r"(?<!\!)\[(.*?)\]\((.*?)\)", text)
+
+# Splits a text TextNode by image or link formatting and 
+# assigns new TextTypes to appropriate nodes
+def split_text_TextNode_by_image_or_link(old_nodes:list) -> list:
+    temp_list = []
+
+    # main recursive function
+    def verify_nodes(nodes:list):
+        nonlocal temp_list
+
+        # End case for recursion
+        if len(nodes) == 0:
+            return temp_list
+        
+        # If TextNode != text, appends to temp_list
+        if nodes[0].text_type != TextType.TEXT:
+            temp_list.append(nodes[0])
+            verify_nodes(nodes=nodes[1:])
+
+        # For all text TextNodes...
+        elif nodes[0].text_type == TextType.TEXT:
+            # If the text is empty, it is ignored and the function recurs
+            if not nodes[0].text:
+                verify_nodes(nodes=nodes[1:])
+            # Else the node is split, images and links are
+            # correctly formatted, and temp_list is extended
+            else:
+                temp_list.extend(split_text(nodes[0]))
+                verify_nodes(nodes=nodes[1:])
+
+    # helper function that splits a single text TextNode by image and link
+    # and assigns correct TextType TextNodes
+    def split_text(node:TextNode) -> list:
+        if node.text_type != TextType.TEXT:
+            raise ValueError(f"Cannot split {node.text_type} type TextNode")
+        
+        node_text = node.text
+        split_string = []
+        nodes = []
+
+        # splits the node text by images, includes the images in the list
+        res = re.split(r"(\!\[.*?\]\(.*?\))", node_text)
+
+        # splits each string in split_string by link, includes link       
+        for x in res:
+            split_string.extend(re.split(r"(?<!\!)(\[.*?\]\(.*?\))", x))
+
+        nodes = to_TextNode(split_string)
+
+        return nodes
+    
+    # helper function that converts each element of a list
+    # into the correct TextType TextNode
+    def to_TextNode(my_list):
+        new_list = []
+
+        for x in my_list:
+            if not x:
+                continue
+
+            extracted_image = extract_markdown_images(x)
+            extracted_link = extract_markdown_links(x)
+
+            if extracted_image:
+                new_list.append(TextNode(text=extracted_image[0][0], 
+                                         text_type=TextType.IMAGE, 
+                                         url=extracted_image[0][1]))
+            elif extracted_link:
+                new_list.append(TextNode(text=extracted_link[0][0],
+                                         text_type=TextType.LINK,
+                                         url=extracted_link[0][1]))
+            else:
+                new_list.append(TextNode(text=x, text_type=TextType.TEXT, 
+                                         url=None))
+
+        return new_list
+    
+    verify_nodes(old_nodes)
+    return temp_list

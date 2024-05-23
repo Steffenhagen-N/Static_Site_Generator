@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, split_text_TextNode
+from textnode import TextNode, split_text_TextNode_by_delimiter
 from constants import TextType
 
 class TestTextNode(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestTextNode(unittest.TestCase):
         print(mylist)
         print("")
         print("Splitting list...")
-        print(split_text_TextNode(mylist))
+        print(split_text_TextNode_by_delimiter(mylist))
         print("")
 
     # This is correct
@@ -46,7 +46,7 @@ class TestTextNode(unittest.TestCase):
         print(mylist)
         print("")
         print("Splitting list...")
-        print(split_text_TextNode(mylist))
+        print(split_text_TextNode_by_delimiter)(mylist)
         print("")
 
     # Splitting and assigning correctly
@@ -68,7 +68,7 @@ class TestTextNode(unittest.TestCase):
         print(mylist)
         print("")
         print("Splitting list...")
-        print(split_text_TextNode(mylist))
+        print(split_text_TextNode_by_delimiter(mylist))
         print("")
 
     # Returning error "Nested delimiter not allowed"
@@ -91,7 +91,7 @@ class TestTextNode(unittest.TestCase):
         print(mylist)
         print("")
         print("Splitting list...")
-        print(split_text_TextNode(mylist))
+        print(split_text_TextNode_by_delimiter(mylist))
         print("")
 
     # Splitting correctly, but text is not being applied to code TextNode
@@ -119,7 +119,7 @@ class TestTextNode(unittest.TestCase):
         print(mylist)
         print("")
         print("Splitting list...")
-        print(split_text_TextNode(mylist))
+        print(split_text_TextNode_by_delimiter(mylist))
         print("")
 
     # This works    
@@ -135,7 +135,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
 
     # This works, but is remaining to retest bold
@@ -157,7 +157,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
 
     # This is sending the unclosed italic error message, fix the regex :(
@@ -183,7 +183,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
 
     # This works
@@ -201,7 +201,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
     
     # This works
@@ -217,7 +217,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
 
     # This works
@@ -233,7 +233,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
     
     # Not returning an error?
@@ -254,7 +254,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
 
     # This works
@@ -270,7 +270,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
 
     # This works
@@ -286,7 +286,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
 
     # This works
@@ -302,7 +302,7 @@ class TestTextNode(unittest.TestCase):
             print(mylist)
             print("")
             print("Splitting list...")
-            print(split_text_TextNode(mylist))
+            print(split_text_TextNode_by_delimiter(mylist))
             print("")
 
     # Returning nested delims not allowed error...
@@ -323,7 +323,7 @@ class TestTextNode(unittest.TestCase):
         print(mylist)
         print("")
         print("Splitting list...")
-        print(split_text_TextNode(mylist))
+        print(split_text_TextNode_by_delimiter(mylist))
         print("")
 
 if __name__ == "__main__":
