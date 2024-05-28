@@ -349,3 +349,18 @@ def split_text_TextNode_by_image_or_link(old_nodes:list) -> list:
     
     verify_nodes(old_nodes)
     return temp_list
+
+# Takes a markdown-formatted string and returns a list of TextNodes 
+# with appropriate types
+def text_to_textnodes(text:str) -> list:
+    temp_textnode = TextNode(text=text, text_type=TextType.TEXT, url=None)
+    temp_list = [temp_textnode]
+    # both split functions only accept lists as arguments, so we need to 
+    # add our temporary textnode to a temporary list in order to pass it
+
+    first_split = [split_text_TextNode_by_delimiter(temp_list)]
+    second_split = sum([split_text_TextNode_by_image_or_link(x) 
+                        for x in first_split], [])
+    # the sum method is the easiest way to resolve an issue with nested lists
+
+    return second_split

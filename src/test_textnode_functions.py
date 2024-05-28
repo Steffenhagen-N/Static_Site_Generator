@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextType, extract_markdown_images, extract_markdown_links, split_text_TextNode_by_image_or_link
+from textnode import TextNode, TextType, extract_markdown_images, extract_markdown_links, split_text_TextNode_by_image_or_link, text_to_textnodes
 
 class TestExtractMDImage(unittest.TestCase):
 
@@ -313,6 +313,107 @@ class TestSplitImageLinkTextnode(unittest.TestCase):
         print("")
         print("Splitting...")
         print(split_text_TextNode_by_image_or_link(my_nodes))
+
+class TestTextToTextNode(unittest.TestCase):
+    
+    def test_just_text(self):
+        my_text = "This won't get split"
+
+        print("")
+        print("Testing converter " "\033[32m" "plain text" "\033[0m" "...")
+        print("Original text:")
+        print(f"Original string: {my_text}")
+        print("")
+        print("Converting...")
+        print(text_to_textnodes(my_text))
+    
+    def test_single_delimiter(self):
+        my_text = "This text has *one* split in it"
+
+        print("")
+        print("Testing converter " "\033[32m" "single delimiter" "\033[0m" "...")
+        print("Original text:")
+        print(f"Original string: {my_text}")
+        print("")
+        print("Converting...")
+        print(text_to_textnodes(my_text))
+
+    def test_single_link(self):
+        my_text = "Look at this cool [link](my_url.org) that I found!"
+
+        print("")
+        print("Testing converter " "\033[32m" "single link" "\033[0m" "...")
+        print("Original text:")
+        print(f"Original string: {my_text}")
+        print("")
+        print("Converting...")
+        print(text_to_textnodes(my_text))
+
+    def test_only_delimiters(self):
+        my_text = "This **text** has an *italic* word and a `code block` in it!"
+
+        print("")
+        print("Testing converter " "\033[32m" "only delimiters" "\033[0m" "...")
+        print("Original text:")
+        print(f"Original string: {my_text}")
+        print("")
+        print("Converting...")
+        print(text_to_textnodes(my_text))
+
+    def test_only_images_and_links(self):
+        my_text = "I found this funny picture ![funi meme](meme.jpeg) on this cool [website](reddit.I.guess.com)"
+
+        print("")
+        print("Testing converter " "\033[32m" "only images and links" "\033[0m" "...")
+        print("Original text:")
+        print(f"Original string: {my_text}")
+        print("")
+        print("Converting...")
+        print(text_to_textnodes(my_text))
+
+    def test_all_no_nested(self):
+        my_text = "This `string` is going to be *very* long... **secret data:** ![ur mom](secret_folder.png) found on [this website](porn.org)"
+
+        print("")
+        print("Testing converter " "\033[32m" "all splits" "\033[0m" "...")
+        print("Original text:")
+        print(f"Original string: {my_text}")
+        print("")
+        print("Converting...")
+        print(text_to_textnodes(my_text))
+
+    def test_missing_url(self):
+        my_text = "I formatted this [link]() wrong :("
+
+        print("")
+        print("Testing converter " "\033[32m" "missing link" "\033[0m" "...")
+        print("Original text:")
+        print(f"Original string: {my_text}")
+        print("")
+        print("Converting...")
+        print(text_to_textnodes(my_text))
+
+    def test_delimiter_in_link(self):
+        my_text = "This shouldn't work ![*very* cute cat](cat.png)"
+
+        print("")
+        print("Testing converter " "\033[32m" "delimiter in link" "\033[0m" "...")
+        print("Original text:")
+        print(f"Original string: {my_text}")
+        print("")
+        print("Converting...")
+        print(text_to_textnodes(my_text))
+
+    def test_link_in_delimiter(self):
+        my_text = "This shouldn't work either **[fat bear](fat.bear.org)**"
+
+        print("")
+        print("Testing converter " "\033[32m" "link in delimiter" "\033[0m" "...")
+        print("Original text:")
+        print(f"Original string: {my_text}")
+        print("")
+        print("Converting...")
+        print(text_to_textnodes(my_text))
 
 if __name__ == "__main__":
     unittest.main()
